@@ -3,33 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SUBWAY 3D</title>
+<title>SUBWAY 3D REALISTA</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#000;color:#fff;font-family:monospace;overflow:hidden}
-#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px;z-index:10;background:linear-gradient(#000,transparent)}
-#hud b{background:#ffe600;color:#000;padding:6px 12px;border-radius:20px}
-#menu{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;z-index:100;padding:20px}
-#menu h1{font-size:42px;color:#ffe600;line-height:.9}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#000;color:#fff;font-family:system-ui,sans-serif;overflow:hidden;touch-action:none}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:12px;z-index:10;background:linear-gradient(#000c,transparent);pointer-events:none}
+#hud b{background:#ffe600;color:#000;padding:7px 14px;border-radius:20px;font-size:14px;box-shadow:0 3px 10px #0008}
+#speedBar{position:fixed;top:52px;left:12px;right:12px;height:6px;background:#fff3;border-radius:10px;overflow:hidden;z-index:10}
+#speedFill{height:100%;width:10%;background:linear-gradient(90deg,#00e676,#ffe600,#ff1744);transition:width .3s}
+#menu{position:fixed;inset:0;background:linear-gradient(#000d,#000a),url('https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800') center/cover;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;z-index:100;padding:20px}
+#menu h1{font-size:52px;color:#ffe600;line-height:.85;text-shadow:0 5px 0 #000,0 0 30px #ffe60088;letter-spacing:-2px}
 #menu h1 span{color:#00e676}
-#play{background:#00e676;color:#000;font-size:24px;padding:16px 40px;border:4px solid #fff;border-radius:14px;font-weight:bold}
-#controls{position:fixed;bottom:14px;left:0;right:0;display:none;justify-content:center;gap:12px;z-index:50}
-#controls button{width:72px;height:72px;border-radius:50%;border:3px solid #fff;font-size:26px;background:rgba(255,255,255,.95)}
+#play{background:#00e676;color:#000;font-size:26px;padding:18px 44px;border:4px solid #fff;border-radius:16px;font-weight:900;box-shadow:0 8px 0 #009624}
+#play:active{transform:translateY(4px);box-shadow:0 2px 0 #009624}
+#controls{position:fixed;bottom:16px;left:0;right:0;display:none;justify-content:center;gap:14px;z-index:50}
+#controls button{width:76px;height:76px;border-radius:50%;border:3px solid #fff;font-size:28px;background:#fffc;box-shadow:0 5px 15px #0008}
 #jump{background:#ffe600!important}
 #roll{background:#2979ff!important;color:#fff!important}
-#msg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);background:#000;padding:18px;border:3px solid #ff1744;border-radius:12px;display:none;z-index:90;text-align:center;font-size:22px}
+#msg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);background:#000e;padding:22px;border:3px solid #ff1744;border-radius:16px;display:none;z-index:90;text-align:center;font-size:22px;width:85%;max-width:340px}
+#combo{position:fixed;top:70px;right:12px;background:#ff1744;color:#fff;padding:6px 12px;border-radius:20px;font-weight:bold;display:none;z-index:10}
+#touchHint{position:fixed;bottom:110px;left:0;right:0;text-align:center;z-index:40;color:#fff;text-shadow:0 2px 5px #000;font-size:14px;pointer-events:none;opacity:.9}
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 </head>
 <body>
 <div id="hud"><b>🏃 SUBWAY 3D</b><b id="score">0 | 🪙 0</b></div>
+<div id="speedBar"><div id="speedFill"></div></div>
+<div id="combo">🔥 COMBO x2</div>
+<div id="touchHint">👉 ARRASTA O DEDO PRO LADO PRA MUDAR DE PISTA 👈</div>
 <div id="menu">
 <h1>SUBWAY<br><span>3D</span></h1>
-<p>Fuja do guarda! Desvie dos trens!</p>
-<p>⬅️ ➡️ trocar pista<br>⬆️ pular | ⬇️ rolar</p>
-<p style="color:#ffe600">Desliza o dedo na tela também!</p>
+<p style="background:#000a;padding:8px 14px;border-radius:20px">Fuja do guarda! Desvie dos trens!</p>
+<p style="font-size:13px;line-height:1.6">👆 <b>ARRASTA O DEDO</b> pra trocar de pista<br>⬆️ Arrasta pra cima = pular<br>⬇️ Arrasta pra baixo = rolar<br>⚡ Quanto mais corre, mais rápido fica!</p>
 <button id="play">▶️ CORRER!</button>
-<p style="font-size:11px;opacity:.6">Cópia fã feita em Three.js - inspirada em Subway Surfers</p>
+<p style="font-size:11px;opacity:.7">Versão Realista - Velocidade Progressiva</p>
 </div>
 <div id="msg"></div>
 <div id="controls">
@@ -40,89 +47,172 @@ body{background:#000;color:#fff;font-family:monospace;overflow:hidden}
 </div>
 <script>
 let scene=new THREE.Scene();
-scene.background=new THREE.Color(0x87ceeb);
-scene.fog=new THREE.Fog(0x87ceeb,20,80);
-let camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,200);
+scene.background=new THREE.Color(0x87CEEB);
+scene.fog=new THREE.Fog(0x87CEEB,25,95);
+let camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.1,300);
 let renderer=new THREE.WebGLRenderer({antialias:true});
 renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
 document.body.appendChild(renderer.domElement);
 renderer.domElement.style.position='fixed';renderer.domElement.style.inset='0';renderer.domElement.style.zIndex='1';
-scene.add(new THREE.AmbientLight(0xffffff,0.9));
-let sun=new THREE.DirectionalLight(0xffffff,0.8);sun.position.set(5,10,5);scene.add(sun);
-let ground=new THREE.Mesh(new THREE.BoxGeometry(12,1,200),new THREE.MeshLambertMaterial({color:0x555555}));ground.position.set(0,-0.5,0);scene.add(ground);
+
+// LUZ REALISTA - sol + ambiente
+scene.add(new THREE.AmbientLight(0xffffff,0.65));
+let sun=new THREE.DirectionalLight(0xfff2cc,1.15);
+sun.position.set(8,18,6);sun.castShadow=true;sun.shadow.camera.left=-20;sun.shadow.camera.right=20;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;sun.shadow.mapSize.set(2048,2048);
+scene.add(sun);
+let hemi=new THREE.HemisphereLight(0x87CEEB,0x5d4037,0.6);scene.add(hemi);
+
+// NUVENS
+let clouds=[];
+for(let i=0;i<8;i++){
+  let g=new THREE.Group();
+  for(let j=0;j<3;j++){let c=new THREE.Mesh(new THREE.SphereGeometry(2+Math.random()*1.5,12,12),new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.9}));c.position.set(j*2.5,Math.random(),0);g.add(c)}
+  g.position.set(-30+Math.random()*60,14+Math.random()*6,-40-Math.random()*60);scene.add(g);clouds.push(g);
+}
+
+// CHAO / TRILHOS REALISTAS
+let ground=new THREE.Mesh(new THREE.BoxGeometry(14,1,220),new THREE.MeshLambertMaterial({color:0x4a4a4a}));ground.position.set(0,-0.5,0);ground.receiveShadow=true;scene.add(ground);
 for(let i=-1;i<=1;i++){
-  let rail=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,200),new THREE.MeshLambertMaterial({color:0xcccccc}));
-  rail.position.set(i*3.2,0.1,0);scene.add(rail);
-  let rail2=rail.clone();rail2.position.x=i*3.2+0.8;scene.add(rail2);
-  let sleeper=new THREE.Mesh(new THREE.BoxGeometry(2.5,0.1,200),new THREE.MeshLambertMaterial({color:0x5d4037}));
-  sleeper.position.set(i*3.2,0,0);scene.add(sleeper);
+  let ballast=new THREE.Mesh(new THREE.BoxGeometry(3,0.18,220),new THREE.MeshLambertMaterial({color:0x6d4c41}));ballast.position.set(i*3.4,-0.05,0);scene.add(ballast);
+  for(let s of [-0.8,0.8]){
+    let rail=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.22,220),new THREE.MeshLambertMaterial({color:0xbdbdbd,metalness:0.8}));rail.position.set(i*3.4+s,0.12,0);scene.add(rail);
+  }
+  for(let z=-100;z<100;z+=1.5){
+    let sl=new THREE.Mesh(new THREE.BoxGeometry(2.8,0.08,0.5),new THREE.MeshLambertMaterial({color:0x3e2723}));sl.position.set(i*3.4,0.02,z);scene.add(sl);
+  }
 }
+// POSTES E ARVORES
+let props=[];
+for(let z=0;z>-180;z-=8){
+  let pole=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,6,8),new THREE.MeshLambertMaterial({color:0x37474f}));pole.position.set(-6.8,3,z);pole.castShadow=true;scene.add(pole);props.push(pole);
+  let lamp=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.2,0.4),new THREE.MeshLambertMaterial({color:0xffe600}));lamp.position.set(-6.4,5.8,z);scene.add(lamp);props.push(lamp);
+  let trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.35,2,8),new THREE.MeshLambertMaterial({color:0x5d4037}));trunk.position.set(7.5,1,z+4);scene.add(trunk);props.push(trunk);
+  let leaves=new THREE.Mesh(new THREE.SphereGeometry(1.6,10,10),new THREE.MeshLambertMaterial({color:0x2e7d32}));leaves.position.set(7.5,3.2,z+4);leaves.castShadow=true;scene.add(leaves);props.push(leaves);
+}
+// PREDIOS COM JANELAS
 let buildings=[];
-for(let i=0;i<30;i++){
-  let h=5+Math.random()*10;
-  let b=new THREE.Mesh(new THREE.BoxGeometry(4,h,4),new THREE.MeshLambertMaterial({color:new THREE.Color().setHSL(Math.random(),0.4,0.5)}));
-  let side=i%2==0?-1:1;
-  b.position.set(side*(7+Math.random()*3),h/2,-i*6);
-  scene.add(b);buildings.push(b);
-  let b2=b.clone();b2.position.z=-i*6-100;scene.add(b2);buildings.push(b2);
+function makeBuilding(x,z){
+  let h=6+Math.random()*12;
+  let g=new THREE.Group();
+  let b=new THREE.Mesh(new THREE.BoxGeometry(5,h,5),new THREE.MeshLambertMaterial({color:new THREE.Color().setHSL(Math.random(),0.3,0.45)}));b.position.y=h/2;b.castShadow=true;b.receiveShadow=true;g.add(b);
+  for(let wy=1;wy<h-1;wy+=1.8) for(let wx=-1.6;wx<=1.6;wx+=1.1){
+    let w=new THREE.Mesh(new THREE.PlaneGeometry(0.7,1),new THREE.MeshBasicMaterial({color:Math.random()>0.5?0xfff59d:0x90caf9}));w.position.set(wx,wy,2.55);g.add(w);
+  }
+  g.position.set(x,0,z);scene.add(g);return g;
 }
+for(let i=0;i<22;i++){buildings.push(makeBuilding(-11-Math.random()*2,-i*9));buildings.push(makeBuilding(11+Math.random()*2,-i*9-4))}
+
+// PERSONAGEM MAIS REALISTA
 let player=new THREE.Group();
-let body=new THREE.Mesh(new THREE.BoxGeometry(0.8,1,0.5),new THREE.MeshLambertMaterial({color:0xffe600}));
-body.position.y=1.1;player.add(body);
-let head=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6),new THREE.MeshLambertMaterial({color:0xffcc80}));
-head.position.y=1.9;player.add(head);
-let hair=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.25,0.62),new THREE.MeshLambertMaterial({color:0x111111}));
-hair.position.y=2.15;player.add(hair);
-let legL=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.7,0.3),new THREE.MeshLambertMaterial({color:0x2979ff}));
-legL.position.set(-0.2,0.35,0);player.add(legL);
-let legR=legL.clone();legR.position.x=0.2;player.add(legR);
-let cap=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.15,0.7),new THREE.MeshLambertMaterial({color:0xff1744}));
-cap.position.y=2.3;player.add(cap);
+let matSkin=new THREE.MeshLambertMaterial({color:0xffcc80});
+let matShirt=new THREE.MeshLambertMaterial({color:0xffffff});
+let matPants=new THREE.MeshLambertMaterial({color:0x1565c0});
+let matShoe=new THREE.MeshLambertMaterial({color:0xff1744});
+let torso=new THREE.Mesh(new THREE.BoxGeometry(0.85,1.05,0.5),matShirt);torso.position.y=1.25;torso.castShadow=true;player.add(torso);
+let backpack=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.7,0.3),new THREE.MeshLambertMaterial({color:0xff6d00}));backpack.position.set(0,1.3,-0.4);player.add(backpack);
+let head=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.62,0.62),matSkin);head.position.y=2.05;head.castShadow=true;player.add(head);
+let hair=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.28,0.64),new THREE.MeshLambertMaterial({color:0x212121}));hair.position.y=2.32;player.add(hair);
+let capTop=new THREE.Mesh(new THREE.BoxGeometry(0.68,0.12,0.72),new THREE.MeshLambertMaterial({color:0xd50000}));capTop.position.y=2.42;player.add(capTop);
+let capAba=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.06,0.4),new THREE.MeshLambertMaterial({color:0xd50000}));capAba.position.set(0,2.38,0.5);player.add(capAba);
+let armL=new THREE.Group();let armLMesh=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.9,0.22),matShirt);armLMesh.position.y=-0.4;armL.add(armLMesh);armL.position.set(-0.55,1.7,0);player.add(armL);
+let armR=armL.clone();armR.position.x=0.55;player.add(armR);
+let legL=new THREE.Group();let legLMesh=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.85,0.32),matPants);legLMesh.position.y=-0.42;legL.add(legLMesh);let shoeL=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.18,0.6),matShoe);shoeL.position.set(0,-0.85,0.12);legL.add(shoeL);legL.position.set(-0.22,0.85,0);player.add(legL);
+let legR=legL.clone();legR.position.x=0.22;player.add(legR);
 scene.add(player);
-let playing=false,lane=1,playerY=0,vy=0,jumping=false,rolling=false,rollT=0,score=0,coins=0,speed=0.28,obstacles=[],coinMesh=[],gameOver=false,dist=0,best=localStorage.getItem('subway3dBest')||0;
-let lanesX=[-3.2,0,3.2];
+// SOMBRA DO PLAYER
+let shadowBlob=new THREE.Mesh(new THREE.CircleGeometry(0.7,20),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.3}));shadowBlob.rotation.x=-Math.PI/2;shadowBlob.position.y=0.02;scene.add(shadowBlob);
+
+let playing=false,lane=1,playerX=0,targetX=0,playerY=0,vy=0,jumping=false,rolling=false,rollT=0,score=0,coins=0,baseSpeed=0.30,speed=0.30,obstacles=[],coinMesh=[],gameOver=false,dist=0,best=localStorage.getItem('subway3dBest')||0,combo=0,runTime=0;
+let lanesX=[-3.4,0,3.4];
 function reset(){
-  playing=true;lane=1;playerY=0;vy=0;score=0;coins=0;speed=0.28;dist=0;gameOver=false;
+  playing=true;lane=1;playerX=0;targetX=0;playerY=0;vy=0;score=0;coins=0;speed=0.30;dist=0;runTime=0;combo=0;gameOver=false;
   obstacles.forEach(o=>scene.remove(o.mesh));obstacles=[];
   coinMesh.forEach(c=>scene.remove(c));coinMesh=[];
   document.getElementById('menu').style.display='none';
   document.getElementById('controls').style.display='flex';
   document.getElementById('msg').style.display='none';
+  document.getElementById('touchHint').style.display='block';
+  setTimeout(()=>document.getElementById('touchHint').style.display='none',4000);
 }
 document.getElementById('play').onclick=reset;
-function left(){if(playing)lane=Math.max(0,lane-1)}
-function right(){if(playing)lane=Math.min(2,lane+1)}
-function jump(){if(playing&&!jumping){jumping=true;vy=0.18}}
-function roll(){if(playing){rolling=true;rollT=40}}
+function left(){if(playing)lane=Math.max(0,lane-1);targetX=lanesX[lane]}
+function right(){if(playing)lane=Math.min(2,lane+1);targetX=lanesX[lane]}
+function jump(){if(playing&&!jumping){jumping=true;vy=0.20;rolling=false}}
+function roll(){if(playing){rolling=true;rollT=45;jumping=false;playerY=0;vy=0}}
 function bind(id,fn){let b=document.getElementById(id);b.addEventListener('touchstart',e=>{e.preventDefault();fn()},{passive:false});b.addEventListener('click',fn)}
 bind('btnL',left);bind('btnR',right);bind('jump',jump);bind('roll',roll);
 addEventListener('keydown',e=>{if(e.key=='ArrowLeft')left();if(e.key=='ArrowRight')right();if(e.key=='ArrowUp')jump();if(e.key=='ArrowDown')roll()});
-let sx=0,sy=0;
-addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
-addEventListener('touchend',e=>{
-  let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
-  if(Math.abs(dx)>Math.abs(dy)){if(dx>30)right();if(dx<-30)left()}else{if(dy<-30)jump();if(dy>30)roll()}
-},{passive:true});
-function spawn(){
-  if(Math.random()<0.015){
-    let l=Math.floor(Math.random()*3);
-    let isTrain=Math.random()<0.4;
-    let mesh;
-    if(isTrain){
-      mesh=new THREE.Mesh(new THREE.BoxGeometry(2.2,2.2,8),new THREE.MeshLambertMaterial({color:0xff1744}));
-      let front=new THREE.Mesh(new THREE.BoxGeometry(1.8,1,0.2),new THREE.MeshLambertMaterial({color:0xffffff}));
-      front.position.set(0,0.5,4.1);mesh.add(front);
-    } else {
-      mesh=new THREE.Mesh(new THREE.BoxGeometry(2.2,1,1),new THREE.MeshLambertMaterial({color:0xff9800}));
-    }
-    mesh.position.set(lanesX[l], isTrain?1.1:0.5, -70);
-    scene.add(mesh);
-    obstacles.push({mesh,lane:l,z:-70,type:isTrain?'train':'barrier'});
+
+// === CONTROLE TOUCH - ARRASTAR O DEDO ===
+let sx=0,sy=0, dragging=false, lastX=0, movedLane=false;
+addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;lastX=sx;dragging=true;movedLane=false},{passive:true});
+addEventListener('touchmove',e=>{
+  if(!dragging||!playing) return;
+  let x=e.touches[0].clientX, y=e.touches[0].clientY;
+  let dx=x-lastX;
+  // Arrastar pros lados move o personagem junto com o dedo - super suave
+  if(Math.abs(dx)>2){
+    playerX+=dx*0.018;
+    playerX=Math.max(-3.4,Math.min(3.4,playerX));
+    // Se arrastar bastante, trava na pista mais próxima
+    if(x-sx>55 && !movedLane){right();movedLane=true;sx=x}
+    if(sx-x>55 && !movedLane){left();movedLane=true;sx=x}
+    lastX=x;
   }
-  if(Math.random()<0.04){
+  let dy=y-sy;
+  if(dy<-45){jump();sy=y;dragging=false}
+  if(dy>45){roll();sy=y;dragging=false}
+},{passive:true});
+addEventListener('touchend',e=>{
+  dragging=false;
+  // Ao soltar, encaixa na pista mais próxima
+  if(playing){
+    let nearest=0, bestD=999;
+    lanesX.forEach((lx,i)=>{let d=Math.abs(playerX-lx);if(d<bestD){bestD=d;nearest=i}});
+    lane=nearest;targetX=lanesX[lane];
+  }
+  let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>25 && Math.abs(dx)>Math.abs(dy)){if(dx>0)right();else left()}
+  else if(Math.abs(dy)>25){if(dy<0)jump();else roll()}
+},{passive:true});
+
+function spawn(){
+  // Mais obstáculos conforme fica rápido
+  let chance=0.014 + speed*0.012;
+  if(Math.random()<chance){
     let l=Math.floor(Math.random()*3);
-    let c=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,0.15,16),new THREE.MeshLambertMaterial({color:0xffd600}));
-    c.rotation.x=Math.PI/2;c.position.set(lanesX[l],1,-70);scene.add(c);coinMesh.push(c);
+    let r=Math.random();
+    let mesh, type;
+    if(r<0.45){
+      // TREM REALISTA - comprido, com luz
+      mesh=new THREE.Group();
+      let bodyM=new THREE.Mesh(new THREE.BoxGeometry(2.4,2.4,14),new THREE.MeshLambertMaterial({color:0xe53935}));bodyM.position.y=1.3;bodyM.castShadow=true;mesh.add(bodyM);
+      let roof=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.25,13.5),new THREE.MeshLambertMaterial({color:0xb71c1c}));roof.position.y=2.6;mesh.add(roof);
+      let win=new THREE.Mesh(new THREE.BoxGeometry(2.45,0.7,11),new THREE.MeshLambertMaterial({color:0x90caf9}));win.position.y=1.8;mesh.add(win);
+      let light=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.4,0.2),new THREE.MeshBasicMaterial({color:0xfff59d}));light.position.set(0,0.8,7.1);mesh.add(light);
+      type='train';
+    } else if(r<0.75){
+      mesh=new THREE.Mesh(new THREE.BoxGeometry(2.4,1.15,1.1),new THREE.MeshLambertMaterial({color:0xff9800}));mesh.position.y=0.58;mesh.castShadow=true;
+      let stripe=new THREE.Mesh(new THREE.BoxGeometry(2.45,0.25,1.12),new THREE.MeshLambertMaterial({color:0xffffff}));stripe.position.y=0.1;mesh.add(stripe);
+      type='barrier';
+    } else {
+      // BARREIRA ALTA - precisa rolar
+      mesh=new THREE.Mesh(new THREE.BoxGeometry(2.4,2.2,0.7),new THREE.MeshLambertMaterial({color:0x2979ff}));mesh.position.y=1.1;mesh.castShadow=true;
+      let txt=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.5,0.05),new THREE.MeshBasicMaterial({color:0xffffff}));txt.position.set(0,0.3,0.4);mesh.add(txt);
+      type='high';
+    }
+    mesh.position.set(lanesX[l],0,-85);
+    scene.add(mesh);
+    obstacles.push({mesh,lane:l,z:-85,type});
+  }
+  if(Math.random()<0.045){
+    let l=Math.floor(Math.random()*3);
+    let c=new THREE.Group();
+    let coin=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.14,20),new THREE.MeshLambertMaterial({color:0xffd600,emissive:0xcc9900}));coin.rotation.x=Math.PI/2;c.add(coin);
+    let inner=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.25,0.16,16),new THREE.MeshLambertMaterial({color:0xfff59d}));inner.rotation.x=Math.PI/2;c.add(inner);
+    c.position.set(lanesX[l],1.1,-85);scene.add(c);coinMesh.push(c);
   }
 }
 function doGameOver(){
@@ -130,41 +220,364 @@ function doGameOver(){
   if(Math.floor(score)>best){best=Math.floor(score);localStorage.setItem('subway3dBest',best)}
   document.getElementById('controls').style.display='none';
   let m=document.getElementById('msg');m.style.display='block';
-  m.innerHTML='💥 BATEU!<br>Score '+Math.floor(score)+' | 🪙 '+coins+'<br>Recorde '+best+'<br><small>Toque pra jogar de novo</small>';
-  m.onclick=()=>{m.style.display='none';document.getElementById('menu').style.display='flex'}
+  m.innerHTML='💥 BATEU!<br>Score '+Math.floor(score)+' | 🪙 '+coins+'<br>⏱️ Sobreviveu '+Math.floor(runTime)+'s | Velocidade máx '+Math.round(speed*100)+' km/h<br>Recorde '+best+'<br><br><button onclick="location.reload()" style="background:#00e676;border:0;padding:12px 28px;border-radius:12px;font-weight:bold;font-size:18px">🔄 JOGAR DE NOVO</button>';
 }
+let clock=0;
 function animate(){
   requestAnimationFrame(animate);
+  clock+=0.016;
   if(playing){
-    dist+=speed;score+=speed*2;speed=Math.min(0.55,0.28+dist/3000);
+    runTime+=0.016; dist+=speed;
+    // === VELOCIDADE AUMENTA COM O TEMPO - FICA INSANO ===
+    // A cada 10 segundos +15% de velocidade, até 3x mais rápido
+    speed=0.30 + (runTime/10)*0.12;
+    speed=Math.min(1.05,speed);
+    score+=speed*3;
     spawn();
-    if(jumping){playerY+=vy;vy-=0.008;if(playerY<=0){playerY=0;jumping=false}}
+    if(jumping){playerY+=vy;vy-=0.009;if(playerY<=0){playerY=0;jumping=false}}
     if(rolling){rollT--;if(rollT<=0)rolling=false}
-    obstacles.forEach(o=>{o.z+=speed*10;o.mesh.position.z=o.z});
-    coinMesh.forEach(c=>{c.position.z+=speed*10;c.rotation.z+=0.1});
-    obstacles=obstacles.filter(o=>{if(o.z>10){scene.remove(o.mesh);return false}return true});
-    coinMesh=coinMesh.filter(c=>{if(c.position.z>10){scene.remove(c);return false}return true});
-    buildings.forEach(b=>{b.position.z+=speed*10;if(b.position.z>10)b.position.z-=180});
-    let px=lanesX[lane];
+    obstacles.forEach(o=>{o.z+=speed*10;o.mesh.position.z=o.z; if(o.type=='train') o.mesh.position.z=o.z});
+    coinMesh.forEach(c=>{c.position.z+=speed*10;c.rotation.y+=0.15});
+    obstacles=obstacles.filter(o=>{if(o.z>12){scene.remove(o.mesh);return false}return true});
+    coinMesh=coinMesh.filter(c=>{if(c.position.z>12){scene.remove(c);return false}return true});
+    buildings.forEach(b=>{b.position.z+=speed*10;if(b.position.z>12)b.position.z-=198});
+    props.forEach(p=>{p.position.z+=speed*10;if(p.position.z>12)p.position.z-=180});
+    clouds.forEach(c=>{c.position.z+=speed*2;if(c.position.z>20)c.position.z=-120});
+    // Colisão usando posição real do player (arrastar)
+    let px=playerX;
     obstacles.forEach(o=>{
-      if(o.lane==lane && Math.abs(o.z)<1.5){
-        if(o.type=='barrier' && jumping && playerY>0.6){} else { if(!gameOver) doGameOver(); }
+      if(Math.abs(o.mesh.position.x-px)<1.4 && Math.abs(o.z)<2.2){
+        let hit=false;
+        if(o.type=='train'){hit=true}
+        if(o.type=='barrier' && !(jumping && playerY>0.7)) hit=true;
+        if(o.type=='high' && !rolling) hit=true;
+        if(hit && !gameOver) doGameOver();
       }
     });
     coinMesh.forEach(c=>{
-      if(Math.abs(c.position.x-px)<0.8 && Math.abs(c.position.z)<1 && Math.abs(c.position.y-(1+playerY))<1){
-        c.position.z=999;coins++;score+=50;
+      if(Math.abs(c.position.x-px)<0.9 && Math.abs(c.position.z)<1.2 && Math.abs(c.position.y-(1.1+playerY))<1.2){
+        c.position.z=999;coins++;score+=50;combo++;if(combo>=5){document.getElementById('combo').style.display='block';setTimeout(()=>document.getElementById('combo').style.display='none',1500);combo=0}
       }
     });
+    // Atualiza barra de velocidade
+    document.getElementById('speedFill').style.width=Math.round((speed/1.05)*100)+'%';
   }
-  let targetX=lanesX[lane];
-  player.position.x+=(targetX-player.position.x)*0.2;
+  // Movimento suave - segue o dedo
+  playerX+=(targetX-playerX)*0.18;
+  player.position.x=playerX;
   player.position.y=playerY;
-  player.scale.y=rolling?0.5:1;
-  player.rotation.z=Math.sin(Date.now()/150)*0.05;
-  camera.position.set(player.position.x*0.7, 4.5+playerY*0.5, 8);
-  camera.lookAt(player.position.x,1.5, -10);
-  document.getElementById('score').textContent=Math.floor(score)+' | 🪙 '+coins+' | Recorde '+best;
+  // Animação de corrida realista - pernas e braços
+  if(playing && !jumping){
+    let runCycle=Math.sin(clock*18)*0.7;
+    legL.rotation.x=runCycle; legR.rotation.x=-runCycle;
+    armL.rotation.x=-runCycle*0.8; armR.rotation.x=runCycle*0.8;
+    player.position.y=playerY+Math.abs(Math.sin(clock*18))*0.08;
+  } else if(jumping){
+    legL.rotation.x=-0.6; legR.rotation.x=0.5; armL.rotation.x=-2.2; armR.rotation.x=-2.2;
+  } else {
+    legL.rotation.x*=0.9; legR.rotation.x*=0.9; armL.rotation.x*=0.9; armR.rotation.x*=0.9;
+  }
+  player.scale.y=rolling?0.45:1;
+  player.rotation.z=(playerX-targetX)*0.08;
+  shadowBlob.position.x=playerX;
+  shadowBlob.scale.setScalar(1 - playerY*0.25);
+  shadowBlob.material.opacity=0.3 - playerY*0.1;
+  camera.position.set(playerX*0.55, 4.6+playerY*0.5, 8.2);
+  camera.lookAt(playerX*0.8,1.6,-12);
+  document.getElementById('score').textContent=Math.floor(score)+' | 🪙 '+coins+' | '+Math.round(speed*100)+' km/h';
+  renderer.render(scene,camera);
+}
+animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body>
+  </html><!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SUBWAY 3D REALISTA</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:#000;color:#fff;font-family:system-ui,sans-serif;overflow:hidden;touch-action:none}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:12px;z-index:10;background:linear-gradient(#000c,transparent);pointer-events:none}
+#hud b{background:#ffe600;color:#000;padding:7px 14px;border-radius:20px;font-size:14px;box-shadow:0 3px 10px #0008}
+#speedBar{position:fixed;top:52px;left:12px;right:12px;height:6px;background:#fff3;border-radius:10px;overflow:hidden;z-index:10}
+#speedFill{height:100%;width:10%;background:linear-gradient(90deg,#00e676,#ffe600,#ff1744);transition:width .3s}
+#menu{position:fixed;inset:0;background:linear-gradient(#000d,#000a),url('https://images.unsplash.com/photo-1474487548417-781cb71495f3?w=800') center/cover;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;z-index:100;padding:20px}
+#menu h1{font-size:52px;color:#ffe600;line-height:.85;text-shadow:0 5px 0 #000,0 0 30px #ffe60088;letter-spacing:-2px}
+#menu h1 span{color:#00e676}
+#play{background:#00e676;color:#000;font-size:26px;padding:18px 44px;border:4px solid #fff;border-radius:16px;font-weight:900;box-shadow:0 8px 0 #009624}
+#play:active{transform:translateY(4px);box-shadow:0 2px 0 #009624}
+#controls{position:fixed;bottom:16px;left:0;right:0;display:none;justify-content:center;gap:14px;z-index:50}
+#controls button{width:76px;height:76px;border-radius:50%;border:3px solid #fff;font-size:28px;background:#fffc;box-shadow:0 5px 15px #0008}
+#jump{background:#ffe600!important}
+#roll{background:#2979ff!important;color:#fff!important}
+#msg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);background:#000e;padding:22px;border:3px solid #ff1744;border-radius:16px;display:none;z-index:90;text-align:center;font-size:22px;width:85%;max-width:340px}
+#combo{position:fixed;top:70px;right:12px;background:#ff1744;color:#fff;padding:6px 12px;border-radius:20px;font-weight:bold;display:none;z-index:10}
+#touchHint{position:fixed;bottom:110px;left:0;right:0;text-align:center;z-index:40;color:#fff;text-shadow:0 2px 5px #000;font-size:14px;pointer-events:none;opacity:.9}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<div id="hud"><b>🏃 SUBWAY 3D</b><b id="score">0 | 🪙 0</b></div>
+<div id="speedBar"><div id="speedFill"></div></div>
+<div id="combo">🔥 COMBO x2</div>
+<div id="touchHint">👉 ARRASTA O DEDO PRO LADO PRA MUDAR DE PISTA 👈</div>
+<div id="menu">
+<h1>SUBWAY<br><span>3D</span></h1>
+<p style="background:#000a;padding:8px 14px;border-radius:20px">Fuja do guarda! Desvie dos trens!</p>
+<p style="font-size:13px;line-height:1.6">👆 <b>ARRASTA O DEDO</b> pra trocar de pista<br>⬆️ Arrasta pra cima = pular<br>⬇️ Arrasta pra baixo = rolar<br>⚡ Quanto mais corre, mais rápido fica!</p>
+<button id="play">▶️ CORRER!</button>
+<p style="font-size:11px;opacity:.7">Versão Realista - Velocidade Progressiva</p>
+</div>
+<div id="msg"></div>
+<div id="controls">
+<button id="btnL">⬅️</button>
+<button id="jump">⬆️</button>
+<button id="roll">⬇️</button>
+<button id="btnR">➡️</button>
+</div>
+<script>
+let scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87CEEB);
+scene.fog=new THREE.Fog(0x87CEEB,25,95);
+let camera=new THREE.PerspectiveCamera(72,innerWidth/innerHeight,0.1,300);
+let renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+document.body.appendChild(renderer.domElement);
+renderer.domElement.style.position='fixed';renderer.domElement.style.inset='0';renderer.domElement.style.zIndex='1';
+
+// LUZ REALISTA - sol + ambiente
+scene.add(new THREE.AmbientLight(0xffffff,0.65));
+let sun=new THREE.DirectionalLight(0xfff2cc,1.15);
+sun.position.set(8,18,6);sun.castShadow=true;sun.shadow.camera.left=-20;sun.shadow.camera.right=20;sun.shadow.camera.top=20;sun.shadow.camera.bottom=-20;sun.shadow.mapSize.set(2048,2048);
+scene.add(sun);
+let hemi=new THREE.HemisphereLight(0x87CEEB,0x5d4037,0.6);scene.add(hemi);
+
+// NUVENS
+let clouds=[];
+for(let i=0;i<8;i++){
+  let g=new THREE.Group();
+  for(let j=0;j<3;j++){let c=new THREE.Mesh(new THREE.SphereGeometry(2+Math.random()*1.5,12,12),new THREE.MeshLambertMaterial({color:0xffffff,transparent:true,opacity:0.9}));c.position.set(j*2.5,Math.random(),0);g.add(c)}
+  g.position.set(-30+Math.random()*60,14+Math.random()*6,-40-Math.random()*60);scene.add(g);clouds.push(g);
+}
+
+// CHAO / TRILHOS REALISTAS
+let ground=new THREE.Mesh(new THREE.BoxGeometry(14,1,220),new THREE.MeshLambertMaterial({color:0x4a4a4a}));ground.position.set(0,-0.5,0);ground.receiveShadow=true;scene.add(ground);
+for(let i=-1;i<=1;i++){
+  let ballast=new THREE.Mesh(new THREE.BoxGeometry(3,0.18,220),new THREE.MeshLambertMaterial({color:0x6d4c41}));ballast.position.set(i*3.4,-0.05,0);scene.add(ballast);
+  for(let s of [-0.8,0.8]){
+    let rail=new THREE.Mesh(new THREE.BoxGeometry(0.14,0.22,220),new THREE.MeshLambertMaterial({color:0xbdbdbd,metalness:0.8}));rail.position.set(i*3.4+s,0.12,0);scene.add(rail);
+  }
+  for(let z=-100;z<100;z+=1.5){
+    let sl=new THREE.Mesh(new THREE.BoxGeometry(2.8,0.08,0.5),new THREE.MeshLambertMaterial({color:0x3e2723}));sl.position.set(i*3.4,0.02,z);scene.add(sl);
+  }
+}
+// POSTES E ARVORES
+let props=[];
+for(let z=0;z>-180;z-=8){
+  let pole=new THREE.Mesh(new THREE.CylinderGeometry(0.12,0.12,6,8),new THREE.MeshLambertMaterial({color:0x37474f}));pole.position.set(-6.8,3,z);pole.castShadow=true;scene.add(pole);props.push(pole);
+  let lamp=new THREE.Mesh(new THREE.BoxGeometry(1.2,0.2,0.4),new THREE.MeshLambertMaterial({color:0xffe600}));lamp.position.set(-6.4,5.8,z);scene.add(lamp);props.push(lamp);
+  let trunk=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.35,2,8),new THREE.MeshLambertMaterial({color:0x5d4037}));trunk.position.set(7.5,1,z+4);scene.add(trunk);props.push(trunk);
+  let leaves=new THREE.Mesh(new THREE.SphereGeometry(1.6,10,10),new THREE.MeshLambertMaterial({color:0x2e7d32}));leaves.position.set(7.5,3.2,z+4);leaves.castShadow=true;scene.add(leaves);props.push(leaves);
+}
+// PREDIOS COM JANELAS
+let buildings=[];
+function makeBuilding(x,z){
+  let h=6+Math.random()*12;
+  let g=new THREE.Group();
+  let b=new THREE.Mesh(new THREE.BoxGeometry(5,h,5),new THREE.MeshLambertMaterial({color:new THREE.Color().setHSL(Math.random(),0.3,0.45)}));b.position.y=h/2;b.castShadow=true;b.receiveShadow=true;g.add(b);
+  for(let wy=1;wy<h-1;wy+=1.8) for(let wx=-1.6;wx<=1.6;wx+=1.1){
+    let w=new THREE.Mesh(new THREE.PlaneGeometry(0.7,1),new THREE.MeshBasicMaterial({color:Math.random()>0.5?0xfff59d:0x90caf9}));w.position.set(wx,wy,2.55);g.add(w);
+  }
+  g.position.set(x,0,z);scene.add(g);return g;
+}
+for(let i=0;i<22;i++){buildings.push(makeBuilding(-11-Math.random()*2,-i*9));buildings.push(makeBuilding(11+Math.random()*2,-i*9-4))}
+
+// PERSONAGEM MAIS REALISTA
+let player=new THREE.Group();
+let matSkin=new THREE.MeshLambertMaterial({color:0xffcc80});
+let matShirt=new THREE.MeshLambertMaterial({color:0xffffff});
+let matPants=new THREE.MeshLambertMaterial({color:0x1565c0});
+let matShoe=new THREE.MeshLambertMaterial({color:0xff1744});
+let torso=new THREE.Mesh(new THREE.BoxGeometry(0.85,1.05,0.5),matShirt);torso.position.y=1.25;torso.castShadow=true;player.add(torso);
+let backpack=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.7,0.3),new THREE.MeshLambertMaterial({color:0xff6d00}));backpack.position.set(0,1.3,-0.4);player.add(backpack);
+let head=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.62,0.62),matSkin);head.position.y=2.05;head.castShadow=true;player.add(head);
+let hair=new THREE.Mesh(new THREE.BoxGeometry(0.64,0.28,0.64),new THREE.MeshLambertMaterial({color:0x212121}));hair.position.y=2.32;player.add(hair);
+let capTop=new THREE.Mesh(new THREE.BoxGeometry(0.68,0.12,0.72),new THREE.MeshLambertMaterial({color:0xd50000}));capTop.position.y=2.42;player.add(capTop);
+let capAba=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.06,0.4),new THREE.MeshLambertMaterial({color:0xd50000}));capAba.position.set(0,2.38,0.5);player.add(capAba);
+let armL=new THREE.Group();let armLMesh=new THREE.Mesh(new THREE.BoxGeometry(0.22,0.9,0.22),matShirt);armLMesh.position.y=-0.4;armL.add(armLMesh);armL.position.set(-0.55,1.7,0);player.add(armL);
+let armR=armL.clone();armR.position.x=0.55;player.add(armR);
+let legL=new THREE.Group();let legLMesh=new THREE.Mesh(new THREE.BoxGeometry(0.32,0.85,0.32),matPants);legLMesh.position.y=-0.42;legL.add(legLMesh);let shoeL=new THREE.Mesh(new THREE.BoxGeometry(0.34,0.18,0.6),matShoe);shoeL.position.set(0,-0.85,0.12);legL.add(shoeL);legL.position.set(-0.22,0.85,0);player.add(legL);
+let legR=legL.clone();legR.position.x=0.22;player.add(legR);
+scene.add(player);
+// SOMBRA DO PLAYER
+let shadowBlob=new THREE.Mesh(new THREE.CircleGeometry(0.7,20),new THREE.MeshBasicMaterial({color:0x000000,transparent:true,opacity:0.3}));shadowBlob.rotation.x=-Math.PI/2;shadowBlob.position.y=0.02;scene.add(shadowBlob);
+
+let playing=false,lane=1,playerX=0,targetX=0,playerY=0,vy=0,jumping=false,rolling=false,rollT=0,score=0,coins=0,baseSpeed=0.30,speed=0.30,obstacles=[],coinMesh=[],gameOver=false,dist=0,best=localStorage.getItem('subway3dBest')||0,combo=0,runTime=0;
+let lanesX=[-3.4,0,3.4];
+function reset(){
+  playing=true;lane=1;playerX=0;targetX=0;playerY=0;vy=0;score=0;coins=0;speed=0.30;dist=0;runTime=0;combo=0;gameOver=false;
+  obstacles.forEach(o=>scene.remove(o.mesh));obstacles=[];
+  coinMesh.forEach(c=>scene.remove(c));coinMesh=[];
+  document.getElementById('menu').style.display='none';
+  document.getElementById('controls').style.display='flex';
+  document.getElementById('msg').style.display='none';
+  document.getElementById('touchHint').style.display='block';
+  setTimeout(()=>document.getElementById('touchHint').style.display='none',4000);
+}
+document.getElementById('play').onclick=reset;
+function left(){if(playing)lane=Math.max(0,lane-1);targetX=lanesX[lane]}
+function right(){if(playing)lane=Math.min(2,lane+1);targetX=lanesX[lane]}
+function jump(){if(playing&&!jumping){jumping=true;vy=0.20;rolling=false}}
+function roll(){if(playing){rolling=true;rollT=45;jumping=false;playerY=0;vy=0}}
+function bind(id,fn){let b=document.getElementById(id);b.addEventListener('touchstart',e=>{e.preventDefault();fn()},{passive:false});b.addEventListener('click',fn)}
+bind('btnL',left);bind('btnR',right);bind('jump',jump);bind('roll',roll);
+addEventListener('keydown',e=>{if(e.key=='ArrowLeft')left();if(e.key=='ArrowRight')right();if(e.key=='ArrowUp')jump();if(e.key=='ArrowDown')roll()});
+
+// === CONTROLE TOUCH - ARRASTAR O DEDO ===
+let sx=0,sy=0, dragging=false, lastX=0, movedLane=false;
+addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;lastX=sx;dragging=true;movedLane=false},{passive:true});
+addEventListener('touchmove',e=>{
+  if(!dragging||!playing) return;
+  let x=e.touches[0].clientX, y=e.touches[0].clientY;
+  let dx=x-lastX;
+  // Arrastar pros lados move o personagem junto com o dedo - super suave
+  if(Math.abs(dx)>2){
+    playerX+=dx*0.018;
+    playerX=Math.max(-3.4,Math.min(3.4,playerX));
+    // Se arrastar bastante, trava na pista mais próxima
+    if(x-sx>55 && !movedLane){right();movedLane=true;sx=x}
+    if(sx-x>55 && !movedLane){left();movedLane=true;sx=x}
+    lastX=x;
+  }
+  let dy=y-sy;
+  if(dy<-45){jump();sy=y;dragging=false}
+  if(dy>45){roll();sy=y;dragging=false}
+},{passive:true});
+addEventListener('touchend',e=>{
+  dragging=false;
+  // Ao soltar, encaixa na pista mais próxima
+  if(playing){
+    let nearest=0, bestD=999;
+    lanesX.forEach((lx,i)=>{let d=Math.abs(playerX-lx);if(d<bestD){bestD=d;nearest=i}});
+    lane=nearest;targetX=lanesX[lane];
+  }
+  let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>25 && Math.abs(dx)>Math.abs(dy)){if(dx>0)right();else left()}
+  else if(Math.abs(dy)>25){if(dy<0)jump();else roll()}
+},{passive:true});
+
+function spawn(){
+  // Mais obstáculos conforme fica rápido
+  let chance=0.014 + speed*0.012;
+  if(Math.random()<chance){
+    let l=Math.floor(Math.random()*3);
+    let r=Math.random();
+    let mesh, type;
+    if(r<0.45){
+      // TREM REALISTA - comprido, com luz
+      mesh=new THREE.Group();
+      let bodyM=new THREE.Mesh(new THREE.BoxGeometry(2.4,2.4,14),new THREE.MeshLambertMaterial({color:0xe53935}));bodyM.position.y=1.3;bodyM.castShadow=true;mesh.add(bodyM);
+      let roof=new THREE.Mesh(new THREE.BoxGeometry(2.2,0.25,13.5),new THREE.MeshLambertMaterial({color:0xb71c1c}));roof.position.y=2.6;mesh.add(roof);
+      let win=new THREE.Mesh(new THREE.BoxGeometry(2.45,0.7,11),new THREE.MeshLambertMaterial({color:0x90caf9}));win.position.y=1.8;mesh.add(win);
+      let light=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.4,0.2),new THREE.MeshBasicMaterial({color:0xfff59d}));light.position.set(0,0.8,7.1);mesh.add(light);
+      type='train';
+    } else if(r<0.75){
+      mesh=new THREE.Mesh(new THREE.BoxGeometry(2.4,1.15,1.1),new THREE.MeshLambertMaterial({color:0xff9800}));mesh.position.y=0.58;mesh.castShadow=true;
+      let stripe=new THREE.Mesh(new THREE.BoxGeometry(2.45,0.25,1.12),new THREE.MeshLambertMaterial({color:0xffffff}));stripe.position.y=0.1;mesh.add(stripe);
+      type='barrier';
+    } else {
+      // BARREIRA ALTA - precisa rolar
+      mesh=new THREE.Mesh(new THREE.BoxGeometry(2.4,2.2,0.7),new THREE.MeshLambertMaterial({color:0x2979ff}));mesh.position.y=1.1;mesh.castShadow=true;
+      let txt=new THREE.Mesh(new THREE.BoxGeometry(2.0,0.5,0.05),new THREE.MeshBasicMaterial({color:0xffffff}));txt.position.set(0,0.3,0.4);mesh.add(txt);
+      type='high';
+    }
+    mesh.position.set(lanesX[l],0,-85);
+    scene.add(mesh);
+    obstacles.push({mesh,lane:l,z:-85,type});
+  }
+  if(Math.random()<0.045){
+    let l=Math.floor(Math.random()*3);
+    let c=new THREE.Group();
+    let coin=new THREE.Mesh(new THREE.CylinderGeometry(0.42,0.42,0.14,20),new THREE.MeshLambertMaterial({color:0xffd600,emissive:0xcc9900}));coin.rotation.x=Math.PI/2;c.add(coin);
+    let inner=new THREE.Mesh(new THREE.CylinderGeometry(0.25,0.25,0.16,16),new THREE.MeshLambertMaterial({color:0xfff59d}));inner.rotation.x=Math.PI/2;c.add(inner);
+    c.position.set(lanesX[l],1.1,-85);scene.add(c);coinMesh.push(c);
+  }
+}
+function doGameOver(){
+  playing=false;gameOver=true;
+  if(Math.floor(score)>best){best=Math.floor(score);localStorage.setItem('subway3dBest',best)}
+  document.getElementById('controls').style.display='none';
+  let m=document.getElementById('msg');m.style.display='block';
+  m.innerHTML='💥 BATEU!<br>Score '+Math.floor(score)+' | 🪙 '+coins+'<br>⏱️ Sobreviveu '+Math.floor(runTime)+'s | Velocidade máx '+Math.round(speed*100)+' km/h<br>Recorde '+best+'<br><br><button onclick="location.reload()" style="background:#00e676;border:0;padding:12px 28px;border-radius:12px;font-weight:bold;font-size:18px">🔄 JOGAR DE NOVO</button>';
+}
+let clock=0;
+function animate(){
+  requestAnimationFrame(animate);
+  clock+=0.016;
+  if(playing){
+    runTime+=0.016; dist+=speed;
+    // === VELOCIDADE AUMENTA COM O TEMPO - FICA INSANO ===
+    // A cada 10 segundos +15% de velocidade, até 3x mais rápido
+    speed=0.30 + (runTime/10)*0.12;
+    speed=Math.min(1.05,speed);
+    score+=speed*3;
+    spawn();
+    if(jumping){playerY+=vy;vy-=0.009;if(playerY<=0){playerY=0;jumping=false}}
+    if(rolling){rollT--;if(rollT<=0)rolling=false}
+    obstacles.forEach(o=>{o.z+=speed*10;o.mesh.position.z=o.z; if(o.type=='train') o.mesh.position.z=o.z});
+    coinMesh.forEach(c=>{c.position.z+=speed*10;c.rotation.y+=0.15});
+    obstacles=obstacles.filter(o=>{if(o.z>12){scene.remove(o.mesh);return false}return true});
+    coinMesh=coinMesh.filter(c=>{if(c.position.z>12){scene.remove(c);return false}return true});
+    buildings.forEach(b=>{b.position.z+=speed*10;if(b.position.z>12)b.position.z-=198});
+    props.forEach(p=>{p.position.z+=speed*10;if(p.position.z>12)p.position.z-=180});
+    clouds.forEach(c=>{c.position.z+=speed*2;if(c.position.z>20)c.position.z=-120});
+    // Colisão usando posição real do player (arrastar)
+    let px=playerX;
+    obstacles.forEach(o=>{
+      if(Math.abs(o.mesh.position.x-px)<1.4 && Math.abs(o.z)<2.2){
+        let hit=false;
+        if(o.type=='train'){hit=true}
+        if(o.type=='barrier' && !(jumping && playerY>0.7)) hit=true;
+        if(o.type=='high' && !rolling) hit=true;
+        if(hit && !gameOver) doGameOver();
+      }
+    });
+    coinMesh.forEach(c=>{
+      if(Math.abs(c.position.x-px)<0.9 && Math.abs(c.position.z)<1.2 && Math.abs(c.position.y-(1.1+playerY))<1.2){
+        c.position.z=999;coins++;score+=50;combo++;if(combo>=5){document.getElementById('combo').style.display='block';setTimeout(()=>document.getElementById('combo').style.display='none',1500);combo=0}
+      }
+    });
+    // Atualiza barra de velocidade
+    document.getElementById('speedFill').style.width=Math.round((speed/1.05)*100)+'%';
+  }
+  // Movimento suave - segue o dedo
+  playerX+=(targetX-playerX)*0.18;
+  player.position.x=playerX;
+  player.position.y=playerY;
+  // Animação de corrida realista - pernas e braços
+  if(playing && !jumping){
+    let runCycle=Math.sin(clock*18)*0.7;
+    legL.rotation.x=runCycle; legR.rotation.x=-runCycle;
+    armL.rotation.x=-runCycle*0.8; armR.rotation.x=runCycle*0.8;
+    player.position.y=playerY+Math.abs(Math.sin(clock*18))*0.08;
+  } else if(jumping){
+    legL.rotation.x=-0.6; legR.rotation.x=0.5; armL.rotation.x=-2.2; armR.rotation.x=-2.2;
+  } else {
+    legL.rotation.x*=0.9; legR.rotation.x*=0.9; armL.rotation.x*=0.9; armR.rotation.x*=0.9;
+  }
+  player.scale.y=rolling?0.45:1;
+  player.rotation.z=(playerX-targetX)*0.08;
+  shadowBlob.position.x=playerX;
+  shadowBlob.scale.setScalar(1 - playerY*0.25);
+  shadowBlob.material.opacity=0.3 - playerY*0.1;
+  camera.position.set(playerX*0.55, 4.6+playerY*0.5, 8.2);
+  camera.lookAt(playerX*0.8,1.6,-12);
+  document.getElementById('score').textContent=Math.floor(score)+' | 🪙 '+coins+' | '+Math.round(speed*100)+' km/h';
   renderer.render(scene,camera);
 }
 animate();
