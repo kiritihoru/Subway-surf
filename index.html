@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>SUBWAY 3D</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#fff;font-family:monospace;overflow:hidden}
+#hud{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;padding:10px;z-index:10;background:linear-gradient(#000,transparent)}
+#hud b{background:#ffe600;color:#000;padding:6px 12px;border-radius:20px}
+#menu{position:fixed;inset:0;background:rgba(0,0,0,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;text-align:center;z-index:100;padding:20px}
+#menu h1{font-size:42px;color:#ffe600;line-height:.9}
+#menu h1 span{color:#00e676}
+#play{background:#00e676;color:#000;font-size:24px;padding:16px 40px;border:4px solid #fff;border-radius:14px;font-weight:bold}
+#controls{position:fixed;bottom:14px;left:0;right:0;display:none;justify-content:center;gap:12px;z-index:50}
+#controls button{width:72px;height:72px;border-radius:50%;border:3px solid #fff;font-size:26px;background:rgba(255,255,255,.95)}
+#jump{background:#ffe600!important}
+#roll{background:#2979ff!important;color:#fff!important}
+#msg{position:fixed;top:35%;left:50%;transform:translate(-50%,-50%);background:#000;padding:18px;border:3px solid #ff1744;border-radius:12px;display:none;z-index:90;text-align:center;font-size:22px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+<div id="hud"><b>🏃 SUBWAY 3D</b><b id="score">0 | 🪙 0</b></div>
+<div id="menu">
+<h1>SUBWAY<br><span>3D</span></h1>
+<p>Fuja do guarda! Desvie dos trens!</p>
+<p>⬅️ ➡️ trocar pista<br>⬆️ pular | ⬇️ rolar</p>
+<p style="color:#ffe600">Desliza o dedo na tela também!</p>
+<button id="play">▶️ CORRER!</button>
+<p style="font-size:11px;opacity:.6">Cópia fã feita em Three.js - inspirada em Subway Surfers</p>
+</div>
+<div id="msg"></div>
+<div id="controls">
+<button id="btnL">⬅️</button>
+<button id="jump">⬆️</button>
+<button id="roll">⬇️</button>
+<button id="btnR">➡️</button>
+</div>
+<script>
+let scene=new THREE.Scene();
+scene.background=new THREE.Color(0x87ceeb);
+scene.fog=new THREE.Fog(0x87ceeb,20,80);
+let camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,200);
+let renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setSize(innerWidth,innerHeight);
+document.body.appendChild(renderer.domElement);
+renderer.domElement.style.position='fixed';renderer.domElement.style.inset='0';renderer.domElement.style.zIndex='1';
+scene.add(new THREE.AmbientLight(0xffffff,0.9));
+let sun=new THREE.DirectionalLight(0xffffff,0.8);sun.position.set(5,10,5);scene.add(sun);
+let ground=new THREE.Mesh(new THREE.BoxGeometry(12,1,200),new THREE.MeshLambertMaterial({color:0x555555}));ground.position.set(0,-0.5,0);scene.add(ground);
+for(let i=-1;i<=1;i++){
+  let rail=new THREE.Mesh(new THREE.BoxGeometry(0.2,0.2,200),new THREE.MeshLambertMaterial({color:0xcccccc}));
+  rail.position.set(i*3.2,0.1,0);scene.add(rail);
+  let rail2=rail.clone();rail2.position.x=i*3.2+0.8;scene.add(rail2);
+  let sleeper=new THREE.Mesh(new THREE.BoxGeometry(2.5,0.1,200),new THREE.MeshLambertMaterial({color:0x5d4037}));
+  sleeper.position.set(i*3.2,0,0);scene.add(sleeper);
+}
+let buildings=[];
+for(let i=0;i<30;i++){
+  let h=5+Math.random()*10;
+  let b=new THREE.Mesh(new THREE.BoxGeometry(4,h,4),new THREE.MeshLambertMaterial({color:new THREE.Color().setHSL(Math.random(),0.4,0.5)}));
+  let side=i%2==0?-1:1;
+  b.position.set(side*(7+Math.random()*3),h/2,-i*6);
+  scene.add(b);buildings.push(b);
+  let b2=b.clone();b2.position.z=-i*6-100;scene.add(b2);buildings.push(b2);
+}
+let player=new THREE.Group();
+let body=new THREE.Mesh(new THREE.BoxGeometry(0.8,1,0.5),new THREE.MeshLambertMaterial({color:0xffe600}));
+body.position.y=1.1;player.add(body);
+let head=new THREE.Mesh(new THREE.BoxGeometry(0.6,0.6,0.6),new THREE.MeshLambertMaterial({color:0xffcc80}));
+head.position.y=1.9;player.add(head);
+let hair=new THREE.Mesh(new THREE.BoxGeometry(0.62,0.25,0.62),new THREE.MeshLambertMaterial({color:0x111111}));
+hair.position.y=2.15;player.add(hair);
+let legL=new THREE.Mesh(new THREE.BoxGeometry(0.3,0.7,0.3),new THREE.MeshLambertMaterial({color:0x2979ff}));
+legL.position.set(-0.2,0.35,0);player.add(legL);
+let legR=legL.clone();legR.position.x=0.2;player.add(legR);
+let cap=new THREE.Mesh(new THREE.BoxGeometry(0.65,0.15,0.7),new THREE.MeshLambertMaterial({color:0xff1744}));
+cap.position.y=2.3;player.add(cap);
+scene.add(player);
+let playing=false,lane=1,playerY=0,vy=0,jumping=false,rolling=false,rollT=0,score=0,coins=0,speed=0.28,obstacles=[],coinMesh=[],gameOver=false,dist=0,best=localStorage.getItem('subway3dBest')||0;
+let lanesX=[-3.2,0,3.2];
+function reset(){
+  playing=true;lane=1;playerY=0;vy=0;score=0;coins=0;speed=0.28;dist=0;gameOver=false;
+  obstacles.forEach(o=>scene.remove(o.mesh));obstacles=[];
+  coinMesh.forEach(c=>scene.remove(c));coinMesh=[];
+  document.getElementById('menu').style.display='none';
+  document.getElementById('controls').style.display='flex';
+  document.getElementById('msg').style.display='none';
+}
+document.getElementById('play').onclick=reset;
+function left(){if(playing)lane=Math.max(0,lane-1)}
+function right(){if(playing)lane=Math.min(2,lane+1)}
+function jump(){if(playing&&!jumping){jumping=true;vy=0.18}}
+function roll(){if(playing){rolling=true;rollT=40}}
+function bind(id,fn){let b=document.getElementById(id);b.addEventListener('touchstart',e=>{e.preventDefault();fn()},{passive:false});b.addEventListener('click',fn)}
+bind('btnL',left);bind('btnR',right);bind('jump',jump);bind('roll',roll);
+addEventListener('keydown',e=>{if(e.key=='ArrowLeft')left();if(e.key=='ArrowRight')right();if(e.key=='ArrowUp')jump();if(e.key=='ArrowDown')roll()});
+let sx=0,sy=0;
+addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+addEventListener('touchend',e=>{
+  let dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>Math.abs(dy)){if(dx>30)right();if(dx<-30)left()}else{if(dy<-30)jump();if(dy>30)roll()}
+},{passive:true});
+function spawn(){
+  if(Math.random()<0.015){
+    let l=Math.floor(Math.random()*3);
+    let isTrain=Math.random()<0.4;
+    let mesh;
+    if(isTrain){
+      mesh=new THREE.Mesh(new THREE.BoxGeometry(2.2,2.2,8),new THREE.MeshLambertMaterial({color:0xff1744}));
+      let front=new THREE.Mesh(new THREE.BoxGeometry(1.8,1,0.2),new THREE.MeshLambertMaterial({color:0xffffff}));
+      front.position.set(0,0.5,4.1);mesh.add(front);
+    } else {
+      mesh=new THREE.Mesh(new THREE.BoxGeometry(2.2,1,1),new THREE.MeshLambertMaterial({color:0xff9800}));
+    }
+    mesh.position.set(lanesX[l], isTrain?1.1:0.5, -70);
+    scene.add(mesh);
+    obstacles.push({mesh,lane:l,z:-70,type:isTrain?'train':'barrier'});
+  }
+  if(Math.random()<0.04){
+    let l=Math.floor(Math.random()*3);
+    let c=new THREE.Mesh(new THREE.CylinderGeometry(0.4,0.4,0.15,16),new THREE.MeshLambertMaterial({color:0xffd600}));
+    c.rotation.x=Math.PI/2;c.position.set(lanesX[l],1,-70);scene.add(c);coinMesh.push(c);
+  }
+}
+function doGameOver(){
+  playing=false;gameOver=true;
+  if(Math.floor(score)>best){best=Math.floor(score);localStorage.setItem('subway3dBest',best)}
+  document.getElementById('controls').style.display='none';
+  let m=document.getElementById('msg');m.style.display='block';
+  m.innerHTML='💥 BATEU!<br>Score '+Math.floor(score)+' | 🪙 '+coins+'<br>Recorde '+best+'<br><small>Toque pra jogar de novo</small>';
+  m.onclick=()=>{m.style.display='none';document.getElementById('menu').style.display='flex'}
+}
+function animate(){
+  requestAnimationFrame(animate);
+  if(playing){
+    dist+=speed;score+=speed*2;speed=Math.min(0.55,0.28+dist/3000);
+    spawn();
+    if(jumping){playerY+=vy;vy-=0.008;if(playerY<=0){playerY=0;jumping=false}}
+    if(rolling){rollT--;if(rollT<=0)rolling=false}
+    obstacles.forEach(o=>{o.z+=speed*10;o.mesh.position.z=o.z});
+    coinMesh.forEach(c=>{c.position.z+=speed*10;c.rotation.z+=0.1});
+    obstacles=obstacles.filter(o=>{if(o.z>10){scene.remove(o.mesh);return false}return true});
+    coinMesh=coinMesh.filter(c=>{if(c.position.z>10){scene.remove(c);return false}return true});
+    buildings.forEach(b=>{b.position.z+=speed*10;if(b.position.z>10)b.position.z-=180});
+    let px=lanesX[lane];
+    obstacles.forEach(o=>{
+      if(o.lane==lane && Math.abs(o.z)<1.5){
+        if(o.type=='barrier' && jumping && playerY>0.6){} else { if(!gameOver) doGameOver(); }
+      }
+    });
+    coinMesh.forEach(c=>{
+      if(Math.abs(c.position.x-px)<0.8 && Math.abs(c.position.z)<1 && Math.abs(c.position.y-(1+playerY))<1){
+        c.position.z=999;coins++;score+=50;
+      }
+    });
+  }
+  let targetX=lanesX[lane];
+  player.position.x+=(targetX-player.position.x)*0.2;
+  player.position.y=playerY;
+  player.scale.y=rolling?0.5:1;
+  player.rotation.z=Math.sin(Date.now()/150)*0.05;
+  camera.position.set(player.position.x*0.7, 4.5+playerY*0.5, 8);
+  camera.lookAt(player.position.x,1.5, -10);
+  document.getElementById('score').textContent=Math.floor(score)+' | 🪙 '+coins+' | Recorde '+best;
+  renderer.render(scene,camera);
+}
+animate();
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});
+</script>
+</body>
+  </html>
